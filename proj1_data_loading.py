@@ -95,6 +95,10 @@ def build_feature_matrix(data):
     # Convert to efficient numpy array
     return numpy.array(matrix)
 
+# Linearly applies the weights vector w to the new features X and
+# returns a vector of predicted values
+def apply_regression(w, X):
+    return numpy.matmul(X, w)
 
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
