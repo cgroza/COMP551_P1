@@ -28,6 +28,8 @@ validating = data[10000:11000]
 testing = data[11000:12000]
 
 # Returns an ordered list of the 160 most common words
+
+
 def get_common_words(comments):
     word_counts = {}
     for comment in comments:
@@ -41,6 +43,8 @@ def get_common_words(comments):
 
 # Counts the occurrence of word features in a comment.
 # Returns a list of counts in the same order as words.
+
+
 def count_word_features(featured_words, comment):
     feature_counts = {}
     for word in featured_words:
