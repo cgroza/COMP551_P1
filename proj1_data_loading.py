@@ -69,6 +69,33 @@ def count_word_length(comment):
     return count
 
 
+def build_feature_matrix(data):
+    # gather comment texts
+    comments = [d["text"] for d in data]
+    # build list of common words to be included as features
+    common_words = get_common_words(comments)
+    # A list of lists. Every sublist is a row.
+    matrix = []
+    for comment in data:
+        # Initial features are controversiality and number of children features
+        features = [comment["controversiality"], comment["children"]]
+        # is_root features
+        if comment["is_root"]:
+            features.append(1)
+        else:
+            features.append(0)
+        # Get counts for the common words
+        word_counts = count_word_features(common_words, comment["text"])
+        # Add them to the row
+        features = features + word_counts
+        # bias column
+        features.append(1)
+        # add the row we just built to the matrix
+        matrix.append(features)
+    # Convert to efficient numpy array
+    return numpy.array(matrix)
+
+
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
     x_tX_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
