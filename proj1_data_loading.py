@@ -26,8 +26,9 @@ validating = data[10000:11000]
 # testing set
 testing = data[11000:12000]
 
-def count_comment_words(comments):
-    word_counts = {}
+# Returns an ordered list of the 160 most common words
+def get_common_words(comments):
+    word_counts = {}.
     for comment in comments:
         for word in comment.split():
             if word in word_counts:
