@@ -54,6 +54,32 @@ def count_word_features(featured_words, comment):
             feature_counts[word] = feature_counts[word] + 1
     return [feature_counts[w] for w in featured_words]
 
+def build_feature_matrix(data):
+    # gather comment texts
+    comments = [d["text"] for d in data]
+    # build list of common words to be included as features
+    common_words = get_common_words(comments)
+    # A list of lists. Every sublist is a row.
+    matrix = []
+    for comment in data:
+        # Initial features are controversiality and number of children features
+        features = [comment["controversiality"], comment["children"]]
+        # is_root features
+        if comment["is_root"]:
+            features.append(1)
+        else:
+            features.append(0)
+        # Get counts for the common words
+        word_counts = count_word_features(common_words, comment["text"])
+        # Add them to the row
+        features = features + word_counts
+        # bias column
+        features.append(1)
+        # add the row we just built to the matrix
+        matrix.append(features)
+    # Convert to efficient numpy array
+    return numpy.array(matrix)
+
 def least_squares_method(X, Y):
     X_t = numpy.transpose(X)
     X_tX_inv = numpy.linalg.inv(numpy.matmul(X_t, X))
