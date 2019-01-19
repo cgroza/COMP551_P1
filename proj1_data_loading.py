@@ -97,7 +97,8 @@ def build_feature_matrix(data):
 def apply_regression(w, X):
     return numpy.matmul(X, w)
 
-# Error metrics
+# Error metrics. The R^2 represents the proportion of the variance explained by
+# this model.
 def r_squared(observed, predicted):
      obs_mean = observed.mean()
      total_ss = sum((observed - obs_mean)**2)
