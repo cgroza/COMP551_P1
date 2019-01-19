@@ -28,7 +28,7 @@ testing = data[11000:12000]
 
 # Returns an ordered list of the 160 most common words
 def get_common_words(comments):
-    word_counts = {}.
+    word_counts = {}
     for comment in comments:
         for word in comment.split():
             if word in word_counts:
