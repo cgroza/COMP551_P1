@@ -27,15 +27,11 @@ validating = data[10000:11000]
 # testing set
 testing = data[11000:12000]
 
-# Returns an ordered list of the 160 most common words
-
-
 def preprocess_words(comments):
-    for comment in comments:
-        comment.lower()
-    return comments
+    # Strings are immutable in Python
+    return [comment.lower() for comment in comments]
 
-
+# Returns an ordered list of the 160 most common words
 def get_common_words(comments):
     word_counts = {}
     for comment in comments:
@@ -49,8 +45,6 @@ def get_common_words(comments):
 
 # Counts the occurrence of word features in a comment.
 # Returns a list of counts in the same order as words.
-
-
 def count_word_features(featured_words, comment):
     feature_counts = {}
     for word in featured_words:
@@ -61,17 +55,20 @@ def count_word_features(featured_words, comment):
     return [feature_counts[w] for w in featured_words]
 
 
-# this function counts the length (number of words) of comment
-
-
+# This function counts the length (number of words) of comment.
 def count_word_length(comment):
     count = len(comment.split())
     return count
 
+# Gathers the target feature from the data and outputs it as vector.
+def build_target_vector(data):
+    return numpy.array([d["popularity_score"] for d in data])
 
+# Gathers features from the data and puts them in a matrix.
+# Features are columns, examples are rows.
 def build_feature_matrix(data):
     # gather comment texts
-    comments = [d["text"] for d in data]
+    comments = preprocess_words([d["text"] for d in data])
     # build list of common words to be included as features
     common_words = get_common_words(comments)
     # A list of lists. Every sublist is a row.
