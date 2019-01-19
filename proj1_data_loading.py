@@ -1,4 +1,5 @@
 import json # we need to use the JSON package to load the data, since the data is stored in JSON format
+import numpy
 
 with open("proj1_data.json") as fp:
     data = json.load(fp)
@@ -52,3 +53,10 @@ def count_word_features(featured_words, comment):
         if word in feature_counts:
             feature_counts[word] = feature_counts[word] + 1
     return [feature_counts[w] for w in featured_words]
+
+def least_squares_method(X, Y):
+    X_t = numpy.transpose(X)
+    X_tX_inv = numpy.linalg.inv(numpy.matmul(X_t, X))
+    X_tX_inv_X_t = numpy.matmul(X_tX_inv, X_t)
+    w = numpy.matmul(X_tX_inv_X_t, Y)
+    return w
