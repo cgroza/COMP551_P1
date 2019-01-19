@@ -16,8 +16,8 @@ with open("proj1_data.json") as fp:
 data_point = data[0] # select the first data point in the dataset
 
 # Now we print all the information about this datapoint
-for info_name, info_value in data_point.items():
-    print(info_name + " : " + str(info_value))
+# for info_name, info_value in data_point.items():
+#    print(info_name + " : " + str(info_value))
 
 # split data set
 # training set
@@ -97,9 +97,24 @@ def build_feature_matrix(data):
 def apply_regression(w, X):
     return numpy.matmul(X, w)
 
+# Error metrics
+def r_squared(observed, predicted):
+     obs_mean = observed.mean()
+     total_ss = sum((observed - obs_mean)**2)
+     explained_ss = sum((predicted - obs_mean)**2)
+     return 1 - (explained_ss/total_ss)
+
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
     x_tX_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
     x_tX_inv_x_t = numpy.matmul(x_tX_inv, x_t)
     w = numpy.matmul(x_tX_inv_x_t, y)
     return w
+
+# Here is an example run with the least squared method
+# Train the model on the training data
+weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
+# Run model on the validating data
+predicted = apply_regression(weights, build_feature_matrix(validating))
+# Report R^2 of the model
+print(r_squared(build_target_vector(validating), predicted))
