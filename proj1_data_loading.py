@@ -1,5 +1,6 @@
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
+import math
 
 with open("proj1_data.json") as fp:
     data = json.load(fp)
@@ -85,6 +86,11 @@ def build_feature_matrix(data):
         word_counts = count_word_features(common_words, comment["text"])
         # Add them to the row
         features = features + word_counts
+        # Comment length
+        # NOTE: I think we should transform this feature
+        # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
+        # Z-score?
+        features.append(count_word_length(comment["text"]))
         # bias column
         features.append(1)
         # add the row we just built to the matrix
