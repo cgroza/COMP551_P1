@@ -91,6 +91,7 @@ def build_feature_matrix(data):
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
         # Z-score?
         features.append(count_word_length(comment["text"]))
+        features.append(comment["children"] * count_word_length(comment["text"]))
         # bias column
         features.append(1)
         # add the row we just built to the matrix
