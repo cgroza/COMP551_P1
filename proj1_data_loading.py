@@ -112,6 +112,10 @@ def r_squared(observed, predicted):
      explained_ss = sum((predicted - obs_mean)**2)
      return 1 - (explained_ss/total_ss)
 
+def mean_squared_error(observed, predicted):
+     error_ss = sum((predicted - observed)**2)
+     return error_ss/len(observed)
+
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
     x_tX_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
@@ -126,3 +130,4 @@ weights = least_squares_method(build_feature_matrix(training), build_target_vect
 predicted = apply_regression(weights, build_feature_matrix(validating))
 # Report R^2 of the model
 print(r_squared(build_target_vector(validating), predicted))
+print(mean_squared_error(build_target_vector(validating), predicted))
