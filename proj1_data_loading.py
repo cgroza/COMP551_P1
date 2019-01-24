@@ -107,7 +107,9 @@ def build_feature_matrix(data):
 
 def gradient_descent(x, y, alpha, theta, max_iteration):
     x_t = numpy.transpose(x)
-    for i in range(max_iteration):
+    count = 0
+    epsilon = 0
+    while count < max_iteration & theta > epsilon:
         epsilon = numpy.dot(x, theta)
         descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), theta) - numpy.matmul(x_t, y))
         theta = theta - alpha * descent
