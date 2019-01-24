@@ -28,9 +28,11 @@ validating = data[10000:11000]
 # testing set
 testing = data[11000:12000]
 
+
 def preprocess_words(comments):
     # Strings are immutable in Python
     return [comment.lower() for comment in comments]
+
 
 # Returns an ordered list of the 160 most common words
 def get_common_words(comments):
@@ -43,6 +45,7 @@ def get_common_words(comments):
                 word_counts[word] = 1
     # return the first 160 words from large frequency to small frequency
     return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
+
 
 # Counts the occurrence of word features in a comment.
 # Returns a list of counts in the same order as words.
@@ -61,9 +64,11 @@ def count_word_length(comment):
     count = len(comment.split())
     return count
 
+
 # Gathers the target feature from the data and outputs it as vector.
 def build_target_vector(data):
     return numpy.array([d["popularity_score"] for d in data])
+
 
 # Gathers features from the data and puts them in a matrix.
 # Features are columns, examples are rows.
@@ -99,10 +104,21 @@ def build_feature_matrix(data):
     # Convert to efficient numpy array
     return numpy.array(matrix)
 
+
+def gradient_descent(x, y, alpha, theta, max_iteration):
+    x_t = numpy.transpose(x)
+    for i in range(max_iteration):
+        epsilon = numpy.dot(x, theta)
+        descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), theta) - numpy.matmul(x_t, y))
+        theta = theta - alpha * descent
+    return theta
+
+
 # Linearly applies the weights vector w to the new features X and
 # returns a vector of predicted values
 def apply_regression(w, X):
     return numpy.matmul(X, w)
+
 
 # Error metrics. The R^2 represents the proportion of the variance explained by
 # this model.
@@ -112,16 +128,19 @@ def r_squared(observed, predicted):
      explained_ss = sum((predicted - obs_mean)**2)
      return 1 - (explained_ss/total_ss)
 
+
 def mean_squared_error(observed, predicted):
      error_ss = sum((predicted - observed)**2)
      return error_ss/len(observed)
 
+
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
-    x_tX_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
-    x_tX_inv_x_t = numpy.matmul(x_tX_inv, x_t)
-    w = numpy.matmul(x_tX_inv_x_t, y)
+    x_tx_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
+    x_tx_inv_x_t = numpy.matmul(x_tx_inv, x_t)
+    w = numpy.matmul(x_tx_inv_x_t, y)
     return w
+
 
 # Here is an example run with the least squared method
 # Train the model on the training data
