@@ -41,7 +41,6 @@ def get_common_words(comments):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
-    # return the first 160 words from large frequency to small frequency
     return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
 
 # Counts the occurrence of word features in a comment.
