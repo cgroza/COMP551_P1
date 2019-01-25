@@ -105,18 +105,22 @@ def build_feature_matrix(data):
     return numpy.array(matrix)
 
 
-def gradient_descent(x, y, alpha, w):
+def gradient_descent(x, y, w):
     x_t = numpy.transpose(x)
     epsilon = 0.0000000001
+    count = 0
+    alpha = 0.5
     while True:
         descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), y) - numpy.matmul(x_t, y))
         w_0 = w
+        alpha = alpha * math.log2(count)
         w = w - alpha * descent
         theta = w - w_0
         if numpy.linalg.norm(theta) < epsilon:
             break
         else:
             pass
+        count = count + 1
     return w
 
 
