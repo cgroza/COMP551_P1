@@ -130,16 +130,17 @@ def least_squares_method(x, y):
 # This function runs function iterations number of times and measures the
 # execution time. It prints a csv file to stdout. We will use it to gather data
 # points and plot it with R.
-def time_function(name, func, iterations):
-    print(name)
-    for i in range(0, iterations):
-        t1 = time.time()
-        func()
-        t2 = time.time()
-        print(t2 - t1)
+def time_function(name, func, iterations, out):
+    with open(out, 'w') as f:
+        f.write(name+"\n")
+        for i in range(0, iterations):
+            t1 = time.time()
+            func()
+            t2 = time.time()
+            f.writelines(str(t2 - t1)+"\n")
 
 def time_least_squares():
-    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20)
+    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
 
 # Here is an example run with the least squared method
 # Train the model on the training data
