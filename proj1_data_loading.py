@@ -89,8 +89,11 @@ def build_feature_matrix(data):
             features.append(0)
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
+        word_value = 0
+        for word_count in word_counts:
+            word_value = numpy.linalg.norm(word_count)
         # Add them to the row
-        features = features + word_counts
+        features.append(word_value)
         # Comment length
         # NOTE: I think we should transform this feature
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
@@ -157,6 +160,13 @@ def least_squares_method(x, y):
 weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
 # Run model on the validating data
 predicted = apply_regression(weights, build_feature_matrix(validating))
+# random_vector = numpy.random.uniform(size=build_feature_matrix(training))
+num_features = build_feature_matrix(training).shape
+print("The number of features: ", num_features)
+
+
+
+
 # Report R^2 of the model
 print(r_squared(build_target_vector(validating), predicted))
 print(mean_squared_error(build_target_vector(validating), predicted))
