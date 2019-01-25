@@ -128,8 +128,8 @@ def least_squares_method(x, y):
     return w
 
 # This function runs function iterations number of times and measures the
-# execution time. It prints a csv file to stdout. We will use it to gather data
-# points and plot it with R.
+# execution time. It writes a csv file to the file out. We will use it to
+# gather data points and plot it with R.
 def time_function(name, func, iterations, out):
     with open(out, 'w') as f:
         f.write(name+"\n")
