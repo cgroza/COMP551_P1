@@ -105,15 +105,19 @@ def build_feature_matrix(data):
     return numpy.array(matrix)
 
 
-def gradient_descent(x, y, alpha, theta, max_iteration):
+def gradient_descent(x, y, alpha, w):
     x_t = numpy.transpose(x)
-    count = 0
-    epsilon = 0
-    while count < max_iteration & theta > epsilon:
-        epsilon = numpy.dot(x, theta)
-        descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), theta) - numpy.matmul(x_t, y))
-        theta = theta - alpha * descent
-    return theta
+    epsilon = 0.0000000001
+    while True:
+        descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), y) - numpy.matmul(x_t, y))
+        w_0 = w
+        w = w - alpha * descent
+        theta = w - w_0
+        if numpy.linalg.norm(theta) < epsilon:
+            break
+        else:
+            pass
+    return w
 
 
 # Linearly applies the weights vector w to the new features X and
