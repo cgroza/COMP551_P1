@@ -91,6 +91,10 @@ def build_feature_matrix(data):
         # Z-score?
         features.append(count_word_length(comment["text"]))
         features.append(comment["children"] * count_word_length(comment["text"]))
+        # if("!" in comment["text"]):
+        #     features.append(1)
+        # else:
+        #     features.append(0)
         # bias column
         features.append(1)
         # add the row we just built to the matrix
