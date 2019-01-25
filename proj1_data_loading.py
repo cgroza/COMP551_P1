@@ -1,6 +1,7 @@
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
 import math
+import time
 
 with open("proj1_data.json") as fp:
     data = json.load(fp)
@@ -41,7 +42,7 @@ def get_common_words(comments):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
-    return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
+                return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
 
 # Counts the occurrence of word features in a comment.
 # Returns a list of counts in the same order as words.
@@ -126,6 +127,20 @@ def least_squares_method(x, y):
     w = numpy.matmul(x_tX_inv_x_t, y)
     return w
 
+# This function runs function iterations number of times and measures the
+# execution time. It prints a csv file to stdout. We will use it to gather data
+# points and plot it with R.
+def time_function(name, func, iterations):
+    print(name)
+    for i in range(0, iterations):
+        t1 = time.time()
+        func()
+        t2 = time.time()
+        print(t2 - t1)
+
+def time_least_squares():
+    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20)
+
 # Here is an example run with the least squared method
 # Train the model on the training data
 weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
@@ -134,3 +149,6 @@ predicted = apply_regression(weights, build_feature_matrix(validating))
 # Report R^2 of the model
 print(r_squared(build_target_vector(validating), predicted))
 print(mean_squared_error(build_target_vector(validating), predicted))
+
+# Example of function timing
+time_least_squares()
