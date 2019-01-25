@@ -145,11 +145,14 @@ def time_least_squares():
 # Here is an example run with the least squared method
 # Train the model on the training data
 weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
-# Run model on the validating data
-predicted = apply_regression(weights, build_feature_matrix(validating))
-# Report R^2 of the model
-print(r_squared(build_target_vector(validating), predicted))
-print(mean_squared_error(build_target_vector(validating), predicted))
 
+def evaluate_model(weights, data):
+    # Run model on the data data
+    predicted = apply_regression(weights, build_feature_matrix(data))
+    # Report R^2 of the model
+    return {"R^2" : r_squared(build_target_vector(data), predicted),
+            "MSE" : mean_squared_error(build_target_vector(data), predicted)}
+
+print(evaluate_model(weights, validating))
 # Example of function timing
 time_least_squares()
