@@ -22,7 +22,7 @@ data_point = data[0] # select the first data point in the dataset
 
 # split data set
 # training set
-training = data[:10]
+training = data[:10000]
 # validating set
 validating = data[10000:11000]
 # testing set
@@ -110,17 +110,19 @@ def build_feature_matrix(data):
 
 def gradient_descent(x, y, w):
     x_t = numpy.transpose(x)
-    epsilon = 0.0001
+    epsilon = 0.00001
     count = 2
-    alpha = 0.00000000005
+    alpha = 0.000000005
+    a = numpy.matmul(x_t, x)
+    b = numpy.matmul(x_t, y)
     while True:
-        gradient = 2 * numpy.subtract(numpy.matmul(numpy.matmul(x_t, x), w), numpy.matmul(x_t, y))
+        gradient = 2 * numpy.subtract(numpy.matmul(a, w), b)
         w_0 = w
-        alpha = alpha * math.log2(count)
-        w = numpy.subtract(w, alpha * gradient)
+        # alpha = alpha * math.log2(count)
+        w = numpy.subtract(w_0, alpha * gradient)
         theta = numpy.subtract(w, w_0)
-        '''print("theta", theta)
-        print("theta_shape", theta.shape)
+        # print("theta", theta)
+        '''print("theta_shape", theta.shape)
         print("theta_norm", numpy.linalg.norm(theta))'''
         if numpy.linalg.norm(theta) < epsilon:
             break
