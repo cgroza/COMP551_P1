@@ -22,7 +22,7 @@ data_point = data[0] # select the first data point in the dataset
 
 # split data set
 # training set
-training = data[:10000]
+training = data[:10]
 # validating set
 validating = data[10000:11000]
 # testing set
@@ -110,15 +110,18 @@ def build_feature_matrix(data):
 
 def gradient_descent(x, y, w):
     x_t = numpy.transpose(x)
-    epsilon = 0.0000000001
-    count = 0
-    alpha = 0.5
+    epsilon = 0.0001
+    count = 2
+    alpha = 0.00000000005
     while True:
-        descent = 2 * (numpy.matmul(numpy.matmul(x_t, x), y) - numpy.matmul(x_t, y))
+        gradient = 2 * numpy.subtract(numpy.matmul(numpy.matmul(x_t, x), w), numpy.matmul(x_t, y))
         w_0 = w
         alpha = alpha * math.log2(count)
-        w = w - alpha * descent
-        theta = w - w_0
+        w = numpy.subtract(w, alpha * gradient)
+        theta = numpy.subtract(w, w_0)
+        '''print("theta", theta)
+        print("theta_shape", theta.shape)
+        print("theta_norm", numpy.linalg.norm(theta))'''
         if numpy.linalg.norm(theta) < epsilon:
             break
         else:
@@ -157,16 +160,25 @@ def least_squares_method(x, y):
 
 # Here is an example run with the least squared method
 # Train the model on the training data
-weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
+train_feature_matrix = build_feature_matrix(training)
+train_target_matrix = build_target_vector(training)
+num_features = train_feature_matrix.shape[1]
+random_vector = numpy.random.rand(num_features)
+# print("w: ", random_vector)
+weights = least_squares_method(train_feature_matrix, train_target_matrix)
+# print(train_target_matrix.shape)
+weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
 # Run model on the validating data
+print(weights)
+print(weights_gd)
 predicted = apply_regression(weights, build_feature_matrix(validating))
-# random_vector = numpy.random.uniform(size=build_feature_matrix(training))
-num_features = build_feature_matrix(training).shape
-print("The number of features: ", num_features)
+predicted_gd = apply_regression(weights_gd, build_feature_matrix(validating))
 
-
-
-
+print("closed form solution")
 # Report R^2 of the model
 print(r_squared(build_target_vector(validating), predicted))
 print(mean_squared_error(build_target_vector(validating), predicted))
+print("gradient descent")
+# Report of GD algorithm
+print(r_squared(build_target_vector(validating), predicted_gd))
+print(mean_squared_error(build_target_vector(validating), predicted_gd))
