@@ -47,7 +47,7 @@ def get_common_words(comments):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
-    return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
+                return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
 
 
 # Counts the occurrence of word features in a comment.
@@ -90,7 +90,6 @@ def build_feature_matrix(data):
     comments = preprocess_words([d["text"] for d in data])
     # build list of common words to be included as features
     common_words = get_common_words(comments)
-    # print(common_words)
     # A list of lists. Every sublist is a row.
     matrix = []
     for comment in data:
@@ -103,18 +102,12 @@ def build_feature_matrix(data):
             features.append(0)
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
-        features = features + word_counts
-        word_value = numpy.linalg.norm(word_counts)
-        # print(common_words)
-        # print(word_counts)
-        # features.append(word_value)
-        # features.append(comment["children"]**2)
-        # word_value = 0
+        word_value = 0
         # TODO: norm or linear equation with exponential decay as wights
-        # for word_count in word_counts:
-        #     word_value = numpy.linalg.norm(word_count)
+        for word_count in word_counts:
+            word_value = numpy.linalg.norm(word_count)
         # Add them to the row
-        # features.append(word_value)
+        features.append(word_value)
         # Comment length
         # NOTE: I think we should transform this feature
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
@@ -132,15 +125,12 @@ def build_feature_matrix(data):
     # Convert to efficient numpy array
     return numpy.array(matrix)
 
-DEFAULT_ALPHA = 0.000000005
 
-def gradient_descent(x, y, alpha):
-    print(alpha)
-    num_features = x.shape[1]
-    w = numpy.random.rand(num_features)
+def gradient_descent(x, y, w):
     x_t = numpy.transpose(x)
     epsilon = 0.00001
     count = 2
+    alpha = 0.000000005
     a = numpy.matmul(x_t, x)
     b = numpy.matmul(x_t, y)
     while True:
@@ -202,10 +192,6 @@ def time_function(name, func, iterations, out):
 def time_least_squares():
     time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
 
-def time_gradient_descent(alpha, alpha_str):
-    print("Timing descentt with alpha = " + str(alpha))
-    time_function("GRADIENT_DESCENT_"+alpha_str, lambda: gradient_descent(build_feature_matrix(training), build_target_vector(training), alpha), 20, alpha_str+"gradient_descent.csv")
-
 def evaluate_model(weights, data):
     # Run model on the data data
     predicted = apply_regression(weights, build_feature_matrix(data))
@@ -214,20 +200,18 @@ def evaluate_model(weights, data):
             "MSE" : mean_squared_error(build_target_vector(data), predicted)}
 
 # Example of function timing
-#time_least_squares()
-#time_gradient_descent(DEFAULT_ALPHA, "DEF")
-#time_gradient_descent(DEFAULT_ALPHA/4, "QUART")
-#time_gradient_descent(DEFAULT_ALPHA/8, "EIGTH")
-#time_gradient_descent(DEFAULT_ALPHA/16, "SIXTEENTH")
+time_least_squares()
 
 # Here is an example run with the least squared method
 # Train the model on the training data
 train_feature_matrix = build_feature_matrix(training)
 train_target_matrix = build_target_vector(training)
+num_features = train_feature_matrix.shape[1]
+random_vector = numpy.random.rand(num_features)
 # print("w: ", random_vector)
 weights = least_squares_method(train_feature_matrix, train_target_matrix)
 # print(train_target_matrix.shape)
-weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, DEFAULT_ALPHA)
+weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
 # Run model on the validating data
 print("closed form solution")
 print(evaluate_model(weights, validating))
