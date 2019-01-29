@@ -102,12 +102,14 @@ def build_feature_matrix(data):
             features.append(0)
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
-        word_value = 0
+        features = features + word_counts
+        features.append(math.sqrt(sum([count^2 for count in word_counts])))
+        # word_value = 0
         # TODO: norm or linear equation with exponential decay as wights
-        for word_count in word_counts:
-            word_value = numpy.linalg.norm(word_count)
+        # for word_count in word_counts:
+        #     word_value = numpy.linalg.norm(word_count)
         # Add them to the row
-        features.append(word_value)
+        # features.append(word_value)
         # Comment length
         # NOTE: I think we should transform this feature
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
