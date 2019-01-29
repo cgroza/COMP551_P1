@@ -199,7 +199,6 @@ def evaluate_model(weights, data):
     return {"R^2" : r_squared(build_target_vector(data), predicted),
             "MSE" : mean_squared_error(build_target_vector(data), predicted)}
 
-print(evaluate_model(weights, validating))
 # Example of function timing
 time_least_squares()
 
