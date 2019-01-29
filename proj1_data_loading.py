@@ -1,9 +1,10 @@
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
-from google.cloud import language
-from google.cloud.language import enums
-from google.cloud.language import types
+#from google.cloud import language
+#from google.cloud.language import enums
+#from google.cloud.language import types
 import math
+import time
 
 with open("proj1_data.json") as fp:
     data = json.load(fp)
@@ -14,7 +15,7 @@ with open("proj1_data.json") as fp:
 # children : the number of replies to this comment (type: int)
 # text : the text of this comment (type: string)
 # controversiality : a score for how "controversial" this comment is (automatically computed by Reddit)
-# is_root : if True, then this comment is a direct reply to a post; if False, this is a direct reply to another comment 
+# is_root : if True, then this comment is a direct reply to a post; if False, this is a direct reply to another comment
 
 # Example:
 data_point = data[0] # select the first data point in the dataset
@@ -46,8 +47,7 @@ def get_common_words(comments):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
-    # return the first 160 words from large frequency to small frequency
-    return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
+                return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
 
 
 # Counts the occurrence of word features in a comment.
@@ -102,18 +102,24 @@ def build_feature_matrix(data):
             features.append(0)
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
-        word_value = 0
+        features = features + word_counts
+        features.append(math.sqrt(sum([count^2 for count in word_counts])))
+        # word_value = 0
         # TODO: norm or linear equation with exponential decay as wights
-        for word_count in word_counts:
-            word_value = numpy.linalg.norm(word_count)
+        # for word_count in word_counts:
+        #     word_value = numpy.linalg.norm(word_count)
         # Add them to the row
-        features.append(word_value)
+        # features.append(word_value)
         # Comment length
         # NOTE: I think we should transform this feature
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
         # Z-score?
         features.append(count_word_length(comment["text"]))
         features.append(comment["children"] * count_word_length(comment["text"]))
+        # if("!" in comment["text"]):
+        #     features.append(1)
+        # else:
+        #     features.append(0)
         # bias column
         features.append(1)
         # add the row we just built to the matrix
@@ -173,6 +179,30 @@ def least_squares_method(x, y):
     w = numpy.matmul(x_tx_inv_x_t, y)
     return w
 
+# This function runs function iterations number of times and measures the
+# execution time. It writes a csv file to the file out. We will use it to
+# gather data points and plot it with R.
+def time_function(name, func, iterations, out):
+    with open(out, 'w') as f:
+        f.write(name+"\n")
+        for i in range(0, iterations):
+            t1 = time.time()
+            func()
+            t2 = time.time()
+            f.writelines(str(t2 - t1)+"\n")
+
+def time_least_squares():
+    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
+
+def evaluate_model(weights, data):
+    # Run model on the data data
+    predicted = apply_regression(weights, build_feature_matrix(data))
+    # Report R^2 of the model
+    return {"R^2" : r_squared(build_target_vector(data), predicted),
+            "MSE" : mean_squared_error(build_target_vector(data), predicted)}
+
+# Example of function timing
+time_least_squares()
 
 # Here is an example run with the least squared method
 # Train the model on the training data
@@ -185,16 +215,10 @@ weights = least_squares_method(train_feature_matrix, train_target_matrix)
 # print(train_target_matrix.shape)
 weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
 # Run model on the validating data
-print(weights)
-print(weights_gd)
-predicted = apply_regression(weights, build_feature_matrix(validating))
-predicted_gd = apply_regression(weights_gd, build_feature_matrix(validating))
-
 print("closed form solution")
+print(evaluate_model(weights, validating))
+
+print("gradient descent solution")
 # Report R^2 of the model
-print(r_squared(build_target_vector(validating), predicted))
-print(mean_squared_error(build_target_vector(validating), predicted))
-print("gradient descent")
 # Report of GD algorithm
-print(r_squared(build_target_vector(validating), predicted_gd))
-print(mean_squared_error(build_target_vector(validating), predicted_gd))
+print(evaluate_model(weights_gd, validating))
