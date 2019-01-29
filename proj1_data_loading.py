@@ -194,6 +194,9 @@ def time_function(name, func, iterations, out):
 def time_least_squares():
     time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
 
+def time_gradient_descent():
+    time_function("GRADIENT_DESCENT", lambda: gradient_descent(build_feature_matrix(training), build_target_vector(training)), 20, "gradient_descent.csv")
+
 def evaluate_model(weights, data):
     # Run model on the data data
     predicted = apply_regression(weights, build_feature_matrix(data))
