@@ -39,7 +39,9 @@ def preprocess_words(comments):
 
 
 # Returns an ordered list of the 160 most common words
-def get_common_words(comments):
+def get_common_words(comments, txt_num):
+    if txt_num == 0:
+        return []
     word_counts = {}
     for comment in comments:
         for word in comment.split():
@@ -47,7 +49,7 @@ def get_common_words(comments):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
-                return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:160]
+    return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:txt_num]
 
 
 # Counts the occurrence of word features in a comment.
@@ -85,11 +87,12 @@ def build_target_vector(data):
 
 # Gathers features from the data and puts them in a matrix.
 # Features are columns, examples are rows.
-def build_feature_matrix(data):
+def build_feature_matrix(data, txt_num):
     # gather comment texts
     comments = preprocess_words([d["text"] for d in data])
     # build list of common words to be included as features
-    common_words = get_common_words(comments)
+    common_words = get_common_words(comments, txt_num)
+    #print(common_words)
     # A list of lists. Every sublist is a row.
     matrix = []
     for comment in data:
@@ -104,16 +107,17 @@ def build_feature_matrix(data):
         word_counts = count_word_features(common_words, comment["text"])
         word_value = 0
         # TODO: norm or linear equation with exponential decay as wights
-        for word_count in word_counts:
-            word_value = numpy.linalg.norm(word_count)
+        #for word_count in word_counts:
+        word_value = numpy.linalg.norm(word_counts)
         # Add them to the row
-        features.append(word_value)
+        #features.append(word_value * features[2])
         # Comment length
         # NOTE: I think we should transform this feature
         # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
         # Z-score?
         features.append(count_word_length(comment["text"]))
         features.append(comment["children"] * count_word_length(comment["text"]))
+
         # if("!" in comment["text"]):
         #     features.append(1)
         # else:
@@ -190,11 +194,11 @@ def time_function(name, func, iterations, out):
             f.writelines(str(t2 - t1)+"\n")
 
 def time_least_squares():
-    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
+    time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training, 100), build_target_vector(training)), 20, "least_squares_time.csv")
 
-def evaluate_model(weights, data):
+def evaluate_model(weights, data, txt_num):
     # Run model on the data data
-    predicted = apply_regression(weights, build_feature_matrix(data))
+    predicted = apply_regression(weights, build_feature_matrix(data, txt_num))
     # Report R^2 of the model
     return {"R^2" : r_squared(build_target_vector(data), predicted),
             "MSE" : mean_squared_error(build_target_vector(data), predicted)}
@@ -204,7 +208,7 @@ time_least_squares()
 
 # Here is an example run with the least squared method
 # Train the model on the training data
-train_feature_matrix = build_feature_matrix(training)
+train_feature_matrix = build_feature_matrix(training, 100)
 train_target_matrix = build_target_vector(training)
 num_features = train_feature_matrix.shape[1]
 random_vector = numpy.random.rand(num_features)
@@ -214,9 +218,11 @@ weights = least_squares_method(train_feature_matrix, train_target_matrix)
 weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
 # Run model on the validating data
 print("closed form solution")
-print(evaluate_model(weights, validating))
+print(evaluate_model(weights, validating, 100))
+print(evaluate_model(weights, testing, 100))
+
 
 print("gradient descent solution")
 # Report R^2 of the model
 # Report of GD algorithm
-print(evaluate_model(weights_gd, validating))
+print(evaluate_model(weights_gd, validating, 100))
