@@ -132,14 +132,14 @@ def build_feature_matrix(data):
     # Convert to efficient numpy array
     return numpy.array(matrix)
 
-DEFAULT_ALPHA = 0.0000000005
+DEFAULT_ALPHA = 0.000000005
 
 def gradient_descent(x, y, alpha):
     print(alpha)
     num_features = x.shape[1]
     w = numpy.random.rand(num_features)
     x_t = numpy.transpose(x)
-    epsilon = 0.000001
+    epsilon = 0.00001
     count = 2
     a = numpy.matmul(x_t, x)
     b = numpy.matmul(x_t, y)
