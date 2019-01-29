@@ -32,6 +32,7 @@ validating = data[10000:11000]
 # testing set
 testing = data[11000:12000]
 
+DEFAULT_ALPHA = 0.000000005
 
 def preprocess_words(comments):
     # Strings are immutable in Python
@@ -105,7 +106,7 @@ def build_feature_matrix(data, txt_num):
             features.append(0)
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
-        word_value = 0
+        features = features + word_counts
         # TODO: norm or linear equation with exponential decay as wights
         #for word_count in word_counts:
         word_value = numpy.linalg.norm(word_counts)
@@ -130,11 +131,10 @@ def build_feature_matrix(data, txt_num):
     return numpy.array(matrix)
 
 
-def gradient_descent(x, y, w):
+def gradient_descent(x, y, w, alpha):
     x_t = numpy.transpose(x)
     epsilon = 0.00001
     count = 2
-    alpha = 0.000000005
     a = numpy.matmul(x_t, x)
     b = numpy.matmul(x_t, y)
     while True:
@@ -196,6 +196,10 @@ def time_function(name, func, iterations, out):
 def time_least_squares():
     time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training, 100), build_target_vector(training)), 20, "least_squares_time.csv")
 
+def time_gradient_descent(alpha, alpha_str):
+    print("Timing descentt with alpha = " + str(alpha))
+    time_function("GRADIENT_DESCENT_"+alpha_str, lambda: gradient_descent(build_feature_matrix(training, 100), build_target_vector(training), alpha), 20, alpha_str+"gradient_descent.csv")
+
 def evaluate_model(weights, data, txt_num):
     # Run model on the data data
     predicted = apply_regression(weights, build_feature_matrix(data, txt_num))
@@ -204,25 +208,26 @@ def evaluate_model(weights, data, txt_num):
             "MSE" : mean_squared_error(build_target_vector(data), predicted)}
 
 # Example of function timing
-time_least_squares()
+#time_least_squares()
+#time_gradient_descent()
+
+NUM_TEXT = 160
 
 # Here is an example run with the least squared method
 # Train the model on the training data
-train_feature_matrix = build_feature_matrix(training, 100)
+train_feature_matrix = build_feature_matrix(training, NUM_TEXT)
 train_target_matrix = build_target_vector(training)
 num_features = train_feature_matrix.shape[1]
+print("Running on " + str(num_features) + " features")
 random_vector = numpy.random.rand(num_features)
 # print("w: ", random_vector)
 weights = least_squares_method(train_feature_matrix, train_target_matrix)
 # print(train_target_matrix.shape)
-weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
+weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector, DEFAULT_ALPHA)
 # Run model on the validating data
 print("closed form solution")
-print(evaluate_model(weights, validating, 100))
-print(evaluate_model(weights, testing, 100))
-
-
+print(evaluate_model(weights, validating, NUM_TEXT))
 print("gradient descent solution")
 # Report R^2 of the model
 # Report of GD algorithm
-print(evaluate_model(weights_gd, validating, 100))
+print(evaluate_model(weights_gd, validating, NUM_TEXT))
