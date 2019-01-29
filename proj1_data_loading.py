@@ -1,5 +1,8 @@
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
+from google.cloud import language
+from google.cloud.language import enums
+from google.cloud.language import types
 import math
 
 with open("proj1_data.json") as fp:
@@ -57,6 +60,16 @@ def count_word_features(featured_words, comment):
         if word in feature_counts:
             feature_counts[word] = feature_counts[word] + 1
     return [feature_counts[w] for w in featured_words]
+
+
+def sentiment_analysis(comment):
+    client = language.LanguageServiceClient()
+    document = types.Document(
+        content=comment,
+        type=enums.Document.Type.PLAIN_TEXT)
+
+    sentiment = client.analyze_sentiment(document=document).document_sentiment
+    return sentiment.score * sentiment.magnitude
 
 
 # This function counts the length (number of words) of comment.
