@@ -1,8 +1,8 @@
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
-from google.cloud import language
-from google.cloud.language import enums
-from google.cloud.language import types
+#from google.cloud import language
+#from google.cloud.language import enums
+#from google.cloud.language import types
 import math
 import time
 
@@ -15,7 +15,7 @@ with open("proj1_data.json") as fp:
 # children : the number of replies to this comment (type: int)
 # text : the text of this comment (type: string)
 # controversiality : a score for how "controversial" this comment is (automatically computed by Reddit)
-# is_root : if True, then this comment is a direct reply to a post; if False, this is a direct reply to another comment 
+# is_root : if True, then this comment is a direct reply to a post; if False, this is a direct reply to another comment
 
 # Example:
 data_point = data[0] # select the first data point in the dataset
@@ -192,10 +192,6 @@ def time_function(name, func, iterations, out):
 def time_least_squares():
     time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training), build_target_vector(training)), 20, "least_squares_time.csv")
 
-# Here is an example run with the least squared method
-# Train the model on the training data
-weights = least_squares_method(build_feature_matrix(training), build_target_vector(training))
-
 def evaluate_model(weights, data):
     # Run model on the data data
     predicted = apply_regression(weights, build_feature_matrix(data))
@@ -218,16 +214,10 @@ weights = least_squares_method(train_feature_matrix, train_target_matrix)
 # print(train_target_matrix.shape)
 weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector)
 # Run model on the validating data
-print(weights)
-print(weights_gd)
-predicted = apply_regression(weights, build_feature_matrix(validating))
-predicted_gd = apply_regression(weights_gd, build_feature_matrix(validating))
-
 print("closed form solution")
+print(evaluate_model(weights, validating))
+
+print("gradient descent solution")
 # Report R^2 of the model
-print(r_squared(build_target_vector(validating), predicted))
-print(mean_squared_error(build_target_vector(validating), predicted))
-print("gradient descent")
 # Report of GD algorithm
-print(r_squared(build_target_vector(validating), predicted_gd))
-print(mean_squared_error(build_target_vector(validating), predicted_gd))
+print(evaluate_model(weights_gd, validating))
