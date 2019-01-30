@@ -211,7 +211,7 @@ def evaluate_model(weights, data, txt_num):
 #time_least_squares()
 #time_gradient_descent()
 
-NUM_TEXT = 90
+NUM_TEXT = 160
 
 # Here is an example run with the least squared method
 # Train the model on the training data
@@ -231,3 +231,5 @@ print("gradient descent solution")
 # Report R^2 of the model
 # Report of GD algorithm
 print(evaluate_model(weights_gd, validating, NUM_TEXT))
+
+print(evaluate_model(weights, testing, NUM_TEXT))

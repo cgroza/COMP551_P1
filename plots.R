@@ -28,8 +28,10 @@ error.plot <- ggplot(gd.errors) + geom_point(aes(x = R2, y = MSE)) + geom_point(
 ggsave("ValidationError.pdf", error.plot)
 
 
-word.trend <- tibble(word.features = c(0, 30, 60, 90, 160), mse = c(0.9954868683378355,0.9981891717698733, 0.9998974894145352, 1.010936093561357, 1.0169063196640469))
-word.plot <- ggplot(word.trend) + geom_line(aes(x=word.features, y=mse)) + geom_point(aes(x=word.features, y=mse)) + ggtitle("Number of text features vs MSE") +
-    labs(x = "Number of text features", y = "MSE")
+word.trend <- tibble(word.features = c(0, 30, 60, 90, 160), Validating = c(0.9954868683378355,0.9981891717698733, 0.9998974894145352, 1.010936093561357, 1.0169063196640469),
+                     Testing = c(1.2929916316350558, 1.3235819430470093, 1.3568025010225244,
+                              1.3394241454727076, 1.3631631524252839)) %>% gather(key = Dataset , value = "MSE", -word.features)
+word.plot <- ggplot(word.trend) + geom_line(aes(x=word.features, y=MSE, color = Dataset)) + geom_point(aes(x=word.features, y=MSE, color = Dataset)) + ggtitle("Number of text features vs MSE") +
+    labs(x = "Number of text features", y = "MSE") #+ scale_y_continuous(limits = c(0.80, 1.20))
 
 ggsave("WordFeaturesMSE.pdf", word.plot)
