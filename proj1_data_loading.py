@@ -198,7 +198,7 @@ def time_least_squares():
 
 def time_gradient_descent(alpha, alpha_str):
     print("Timing descentt with alpha = " + str(alpha))
-    time_function("GRADIENT_DESCENT_"+alpha_str, lambda: gradient_descent(build_feature_matrix(training, 0), build_target_vector(training), alpha), 20, alpha_str+"gradient_descent.csv")
+    time_function("GRADIENT_DESCENT_"+alpha_str, lambda: gradient_descent(build_feature_matrix(training, 0), build_target_vector(training), numpy.random.rand(6), alpha), 20, alpha_str+"gradient_descent.csv")
 
 def evaluate_model(weights, data, txt_num):
     # Run model on the data data
