@@ -17,3 +17,12 @@ times <- tibble(Closed=least.squres.times$LEAST_SQUARES, Gradient = gd.times$GRA
 time.plot <- ggplot(times) + geom_boxplot(aes(x = Method, y = Time)) + geom_jitter(aes(x=Method, y=Time)) +
     ggtitle("Training time comparison") + labs(x = "Method", y = "Training time (s)")
 ggsave("TrainingTimes.pdf", time.plot)
+
+
+gd.errors <- read_csv("gd_error.csv", col_names = T)
+ls.errors <- tibble(R2 = 0.8374430425869106, MSE = 0.9954868683378355)
+
+error.plot <- ggplot(gd.errors) + geom_point(aes(x = R2, y = MSE)) + geom_point(data = ls.errors, aes(x=R2, y = MSE), color = "blue") +
+    ggtitle("Validation R-squared vs Mean Square Error") + labs(x = "R-squared", y = "MSE") + scale_y_continuous(limits = (0.80, 1.20)) + + scale_x_continuous(limits = (0.60, 1))
+
+ggsave("ValidationError.pdf", error.plot)
