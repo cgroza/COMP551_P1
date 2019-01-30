@@ -211,7 +211,7 @@ def evaluate_model(weights, data, txt_num):
 #time_least_squares()
 #time_gradient_descent()
 
-NUM_TEXT = 0
+NUM_TEXT = 90
 
 # Here is an example run with the least squared method
 # Train the model on the training data

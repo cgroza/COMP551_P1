@@ -26,3 +26,10 @@ error.plot <- ggplot(gd.errors) + geom_point(aes(x = R2, y = MSE)) + geom_point(
     ggtitle("Validation R-squared vs Mean Square Error") + labs(x = "R-squared", y = "MSE") + scale_y_continuous(limits = (0.80, 1.20)) + + scale_x_continuous(limits = (0.60, 1))
 
 ggsave("ValidationError.pdf", error.plot)
+
+
+word.trend <- tibble(word.features = c(0, 30, 60, 90, 160), mse = c(0.9954868683378355,0.9981891717698733, 0.9998974894145352, 1.010936093561357, 1.0169063196640469))
+word.plot <- ggplot(word.trend) + geom_line(aes(x=word.features, y=mse)) + geom_point(aes(x=word.features, y=mse)) + ggtitle("Number of text features vs MSE") +
+    labs(x = "Number of text features", y = "MSE")
+
+ggsave("WordFeaturesMSE.pdf", word.plot)
