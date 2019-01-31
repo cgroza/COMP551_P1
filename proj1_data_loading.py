@@ -9,7 +9,6 @@ import time
 with open("proj1_data.json") as fp:
     data = json.load(fp)
 
-
 # Split the full data set into a training set, validating set, and testing set.
 # Training set
 training = data[:10000]
