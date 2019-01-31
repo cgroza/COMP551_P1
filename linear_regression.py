@@ -1,3 +1,8 @@
+# Authors:
+# Rinita Tazreen
+# Bill Zhang
+# Cristian Groza
+
 import json  # we need to use the JSON package to load the data, since the data is stored in JSON format
 import numpy
 #from google.cloud import language
