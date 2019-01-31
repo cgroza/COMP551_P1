@@ -9,37 +9,31 @@ import time
 with open("proj1_data.json") as fp:
     data = json.load(fp)
 
-# Now the data is loaded.
-# It a list of data points, where each datapoint is a dictionary with the following attributes:
-# popularity_score : a popularity score for this comment (based on the number of upvotes) (type: float)
-# children : the number of replies to this comment (type: int)
-# text : the text of this comment (type: string)
-# controversiality : a score for how "controversial" this comment is (automatically computed by Reddit)
-# is_root : if True, then this comment is a direct reply to a post; if False, this is a direct reply to another comment
 
-# Example:
-data_point = data[0] # select the first data point in the dataset
-
-# Now we print all the information about this datapoint
-# for info_name, info_value in data_point.items():
-#    print(info_name + " : " + str(info_value))
-
-# split data set
-# training set
+# Split the full data set into a training set, validating set, and testing set.
+# Training set
 training = data[:10000]
-# validating set
+# Validating set
 validating = data[10000:11000]
-# testing set
+# Testing set
 testing = data[11000:12000]
 
+# This is the default learning rate constant that should be used for gradient descent.
 DEFAULT_ALPHA = 0.000000005
 
+# Number of word text features to be included in the model
+NUM_TEXT = 0
+
+# Helper function to Convert the comment text to lower case.
+# comments: list of strings
 def preprocess_words(comments):
     # Strings are immutable in Python
     return [comment.lower() for comment in comments]
 
 
 # Returns an ordered list of the 160 most common words
+# comments: list of strings to be considered
+# txt_num: number of top ranked words to compute
 def get_common_words(comments, txt_num):
     if txt_num == 0:
         return []
@@ -50,11 +44,14 @@ def get_common_words(comments, txt_num):
                 word_counts[word] = word_counts[word] + 1
             else:
                 word_counts[word] = 1
+    # Return word list in decreasing occurrence order
     return [w[0] for w in reversed(sorted(word_counts.items(), key= lambda kv: kv[1]))][:txt_num]
 
 
 # Counts the occurrence of word features in a comment.
 # Returns a list of counts in the same order as words.
+# featured_words: ordered word list to be counted
+# comment: string to count words in.
 def count_word_features(featured_words, comment):
     feature_counts = {}
     for word in featured_words:
@@ -65,6 +62,8 @@ def count_word_features(featured_words, comment):
     return [feature_counts[w] for w in featured_words]
 
 
+# Function that queries the Google API for sentiment analysis.
+# We did not use this due to number of allowed API calls limitation.
 def sentiment_analysis(comment):
     client = language.LanguageServiceClient()
     document = types.Document(
@@ -88,12 +87,13 @@ def build_target_vector(data):
 
 # Gathers features from the data and puts them in a matrix.
 # Features are columns, examples are rows.
+# data: list of comment dictionaries to be considered.
+# txt_num: number of text word features to include (taken from the ranking of words).
 def build_feature_matrix(data, txt_num):
-    # gather comment texts
+    # Gather comment texts
     comments = preprocess_words([d["text"] for d in data])
-    # build list of common words to be included as features
+    # Build list of common words to be included as features
     common_words = get_common_words(comments, txt_num)
-    #print(common_words)
     # A list of lists. Every sublist is a row.
     matrix = []
     for comment in data:
@@ -107,31 +107,25 @@ def build_feature_matrix(data, txt_num):
         # Get counts for the common words
         word_counts = count_word_features(common_words, comment["text"])
         features = features + word_counts
-        # TODO: norm or linear equation with exponential decay as wights
-        #for word_count in word_counts:
-        word_value = numpy.linalg.norm(word_counts)
-        # Add them to the row
-        #features.append(word_value * features[2])
-        # Comment length
-        # NOTE: I think we should transform this feature
-        # somehow. Both log and sqrt transforms do a tiny bit better. Maybe a
-        # Z-score?
+        # Add word_length feature
         features.append(count_word_length(comment["text"]))
+        # Add word_length*children interaction feature
         features.append(comment["children"] * count_word_length(comment["text"]))
 
-        # if("!" in comment["text"]):
-        #     features.append(1)
-        # else:
-        #     features.append(0)
-        # bias column
+        # Bias column
         features.append(1)
-        # add the row we just built to the matrix
+        # Add the row we just built to the matrix
         matrix.append(features)
     # Convert to efficient numpy array
     return numpy.array(matrix)
 
-
+# Gradient descent implementation.
+#x: features matrix
+#y: target feature vector
+#w: initial weight vector
+#alpha: learning rate
 def gradient_descent(x, y, w, alpha):
+    # Precompute reusable values
     x_t = numpy.transpose(x)
     epsilon = 0.00001
     count = 2
@@ -140,16 +134,13 @@ def gradient_descent(x, y, w, alpha):
     while True:
         gradient = 2 * numpy.subtract(numpy.matmul(a, w), b)
         w_0 = w
-        # alpha = alpha * math.log2(count)
+        # Compute weight deltas
         w = numpy.subtract(w_0, alpha * gradient)
+        # Update weights
         theta = numpy.subtract(w, w_0)
-        # print("theta", theta)
-        '''print("theta_shape", theta.shape)
-        print("theta_norm", numpy.linalg.norm(theta))'''
+        # Stop if we reached minimum precision
         if numpy.linalg.norm(theta) < epsilon:
             break
-        else:
-            pass
         count = count + 1
     return w
 
@@ -168,12 +159,14 @@ def r_squared(observed, predicted):
      explained_ss = sum((predicted - obs_mean)**2)
      return 1 - (explained_ss/total_ss)
 
-
+# MSE error metric
 def mean_squared_error(observed, predicted):
      error_ss = sum((predicted - observed)**2)
      return error_ss/len(observed)
 
-
+# Closed form solution implementation.
+#x: features matrix
+#y: target feature vector
 def least_squares_method(x, y):
     x_t = numpy.transpose(x)
     x_tx_inv = numpy.linalg.inv(numpy.matmul(x_t, x))
@@ -193,6 +186,7 @@ def time_function(name, func, iterations, out):
             t2 = time.time()
             f.writelines(str(t2 - t1)+"\n")
 
+# Helper function for time benchmarks.
 def time_least_squares():
     time_function("LEAST_SQUARES", lambda: least_squares_method(build_feature_matrix(training, 0), build_target_vector(training)), 20, "least_squares_time.csv")
 
@@ -200,10 +194,14 @@ def time_gradient_descent(alpha, alpha_str):
     print("Timing descentt with alpha = " + str(alpha))
     time_function("GRADIENT_DESCENT_"+alpha_str, lambda: gradient_descent(build_feature_matrix(training, 0), build_target_vector(training), numpy.random.rand(6), alpha), 20, alpha_str+"gradient_descent.csv")
 
+# Helper function that evaluates the performance of the model in terms of MSE and R^2.
+#weights: the coefficients of the model
+#data: the data to apply linear regression to.
+#txt_num: number of text features in the model.
 def evaluate_model(weights, data, txt_num):
-    # Run model on the data data
+    # Run model on the data data.
     predicted = apply_regression(weights, build_feature_matrix(data, txt_num))
-    # Report R^2 of the model
+    # Report R^2 of the model.
     return {"R^2" : r_squared(build_target_vector(data), predicted),
             "MSE" : mean_squared_error(build_target_vector(data), predicted)}
 
@@ -211,25 +209,30 @@ def evaluate_model(weights, data, txt_num):
 #time_least_squares()
 #time_gradient_descent()
 
-NUM_TEXT = 160
-
-# Here is an example run with the least squared method
-# Train the model on the training data
+# Train the model on the training data.
 train_feature_matrix = build_feature_matrix(training, NUM_TEXT)
+# Get the target feature vector.
 train_target_matrix = build_target_vector(training)
+
+# get the number of features in this model.
 num_features = train_feature_matrix.shape[1]
 print("Running on " + str(num_features) + " features")
+
+# Pick a starting point for gradient descent
 random_vector = numpy.random.rand(num_features)
-# print("w: ", random_vector)
+# Train with least squares
 weights = least_squares_method(train_feature_matrix, train_target_matrix)
-# print(train_target_matrix.shape)
+# Train with gradient descent
 weights_gd = gradient_descent(train_feature_matrix, train_target_matrix, random_vector, DEFAULT_ALPHA)
 # Run model on the validating data
-print("closed form solution")
+# Report least squares solution on validating dataset
+print("Closed Form Solution:")
 print(evaluate_model(weights, validating, NUM_TEXT))
-print("gradient descent solution")
-# Report R^2 of the model
-# Report of GD algorithm
+
+# Report gradient descent solution on validating dataset
+print("Gradient Descent Solution")
 print(evaluate_model(weights_gd, validating, NUM_TEXT))
 
+# Report least squares solution on testing dataset
+print("Least squares on testing data set")
 print(evaluate_model(weights, testing, NUM_TEXT))
